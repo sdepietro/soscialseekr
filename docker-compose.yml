@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+    app:
+        build:
+            context: ./docker/php
+        container_name: ypf_bdots_php
+        volumes:
+            - ./:/var/www/html
+            - storage_data:/var/www/html/storage
+            - cache_data:/var/www/html/bootstrap/cache
+        ports:
+            - "8088:80"
+        depends_on:
+            - db
+        entrypoint: ["/bin/bash", "-c", "/var/www/html/docker/php/init.sh"]
+
+    db:
+        image: mysql:5.7
+        platform: linux/amd64
+        container_name: ypf_bdots_db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ypf_bdots
+            MYSQL_ROOT_PASSWORD: root
+        ports:
+            - "3307:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: ypf_bdots_phpmyadmin
+        restart: unless-stopped
+        environment:
+            PMA_HOST: db
+            MYSQL_ROOT_PASSWORD: root
+            UPLOAD_LIMIT: 512M
+        ports:
+            - "8080:80"
+        depends_on:
+            - db
+
+volumes:
+    mysql_data:
+    storage_data:
+    cache_data:

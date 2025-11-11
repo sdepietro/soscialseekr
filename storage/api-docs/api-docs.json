@@ -1,0 +1,664 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "http://www.cotizaseguro.local/api/"
+        }
+    ],
+    "paths": {
+        "/v1/orders": {
+            "post": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Crear una orden con pasajeros",
+                "description": "Crea una orden y sus pasajeros asociados.",
+                "operationId": "orders.store",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "origin_id",
+                                    "destination_id",
+                                    "travel_start_date",
+                                    "travel_end_date",
+                                    "passengers"
+                                ],
+                                "properties": {
+                                    "origin_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "destination_id": {
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "travel_start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-09-10"
+                                    },
+                                    "travel_end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-09-18"
+                                    },
+                                    "whatsapp": {
+                                        "type": "string",
+                                        "example": "+5491122334455",
+                                        "nullable": true
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "pepetest@yopmail.com",
+                                        "nullable": true
+                                    },
+                                    "passengers": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "age": {
+                                                    "type": "string",
+                                                    "example": "30",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "minItems": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Orden creada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/OrderResource"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/v1/orders/{id}": {
+            "get": {
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Obtener una orden por su ID",
+                "description": "Retorna la información completa de una orden, incluyendo sus pasajeros asociados.",
+                "operationId": "d4254e29a7432c972c105889e541f1dd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID numérico de la orden",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Orden encontrada y retornada exitosamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "origin_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "destination_id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "travel_start_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-09-01"
+                                                },
+                                                "travel_end_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-09-10"
+                                                },
+                                                "whatsapp": {
+                                                    "type": "string",
+                                                    "example": "+5491123456789"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "cliente@correo.com"
+                                                },
+                                                "passengers": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 10
+                                                            },
+                                                            "order_id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Juan"
+                                                            },
+                                                            "lastname": {
+                                                                "type": "string",
+                                                                "example": "Pérez"
+                                                            },
+                                                            "age": {
+                                                                "type": "integer",
+                                                                "example": 30
+                                                            },
+                                                            "birthdate": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "1995-05-15"
+                                                            },
+                                                            "document_number": {
+                                                                "type": "string",
+                                                                "example": "12345678"
+                                                            },
+                                                            "gender": {
+                                                                "type": "string",
+                                                                "example": "M"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Orden no encontrada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Orden no encontrada"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/places": {
+            "get": {
+                "tags": [
+                    "Regiones"
+                ],
+                "summary": "Listado de regiones",
+                "operationId": "0a6703a6c9b57dce7816172b7ad9bf8d",
+                "responses": {
+                    "200": {
+                        "description": "Lista la info del usuario logueado."
+                    }
+                }
+            }
+        },
+        "/v1/auth/register": {
+            "post": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Registro de usuario nuevo",
+                "operationId": "406c90166f7c1b1c17ea74d57ca8b145",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "example": {
+                                    "user_type": "patient",
+                                    "name": "Sergio",
+                                    "lastname": "De Pietro",
+                                    "email": "sdepietro@gmail.com",
+                                    "password": "123456",
+                                    "password_confirmation": "123456",
+                                    "identification_type_id": 1,
+                                    "identification": 31555999,
+                                    "cellphone": "+5491150052081",
+                                    "date_of_birth": "1986-02-16T07:30:00.000Z",
+                                    "gender_id": 1,
+                                    "time_zone": "America/Port_of_Spain"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Registro de usuario nuevo."
+                    }
+                }
+            }
+        },
+        "/v1/auth/password_request": {
+            "post": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Recuperar contraseña",
+                "operationId": "edc5f6fd79d5344e30b8f97a5211dc59",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "email": "sdepietro@gmail.com"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/v1/auth/change_password": {
+            "post": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Confirmar cambio de contraseña con token",
+                "operationId": "f8ad0062354274f552aa2e0992256e72",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "token",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "token": {
+                                        "type": "string",
+                                        "example": "abc123token"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NuevaPassword123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "NuevaPassword123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Contraseña actualizada correctamente.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Contraseña actualizada correctamente."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Token inválido o usuario no encontrado.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Token inválido o expirado."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Errores de validación.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Datos inválidos"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "password": [
+                                                    "El campo password es obligatorio."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Login del usuario",
+                "operationId": "3cddff7e9638bafb7f0aad8864bb4d5b",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "example": {
+                                    "email": "admin@test.com",
+                                    "password": "123456"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lista la info del usuario logueado."
+                    }
+                }
+            }
+        },
+        "/v1/users/me": {
+            "get": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Mostrar la info de un usuario",
+                "operationId": "9de0b534dc36ed0d2b82a9fa67de6518",
+                "responses": {
+                    "200": {
+                        "description": "Lista la info del usuario logueado."
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Actualizar datos del usuario",
+                "operationId": "0611ffd0dc50a7c12766073105c930a0",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string"
+                                    },
+                                    "last_name": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "first_name": "Sergio",
+                                    "last_name": "De Pietro",
+                                    "phone": "+5491150052081"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lista la info del usuario logueado."
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/v1/users/password": {
+            "put": {
+                "tags": [
+                    "Usuarios"
+                ],
+                "summary": "Actualizar contraseña del usuario",
+                "operationId": "a5e8982cc3307f7bf784307fd46dd552",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "old_password": {
+                                        "type": "string"
+                                    },
+                                    "new_password": {
+                                        "type": "string"
+                                    },
+                                    "re_password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object",
+                                "example": {
+                                    "old_password": "123456",
+                                    "new_password": "12345678",
+                                    "new_password_confirmation": "12345678"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Actualizacion de password."
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "OrderPassengerResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "order_id": {
+                        "type": "integer",
+                        "example": 99
+                    },
+                    "age": {
+                        "type": "string",
+                        "example": "30",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "example": "2025-08-12T15:30:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "example": "2025-08-12T15:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "OrderResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 99
+                    },
+                    "origin_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "destination_id": {
+                        "type": "integer",
+                        "example": 4
+                    },
+                    "place_id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "travel_start_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-09-10"
+                    },
+                    "travel_end_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-09-18"
+                    },
+                    "whatsapp": {
+                        "type": "string",
+                        "example": "+5491122334455",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "example": "2025-08-12T15:30:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "example": "2025-08-12T15:30:00Z"
+                    },
+                    "passengers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrderPassengerResource"
+                        }
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "apiAuth": {
+                "type": "apiKey",
+                "description": "Para obtener este token hay que hacer login con usuario y contraseña. Y se agregará una cabezcera AuthorizationJWT: Bearer xxxxxx.yyyyyy.zzzzzzzzzz. NO OLVIDARSE DE AGREGAR EL bearer a mano.",
+                "name": "Authorizationjwt",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Usuarios",
+            "description": "Request del objeto users"
+        },
+        {
+            "name": "Orders",
+            "description": "Orders"
+        },
+        {
+            "name": "Regiones",
+            "description": "Regiones"
+        }
+    ]
+}
