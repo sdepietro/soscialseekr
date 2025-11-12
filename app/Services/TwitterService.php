@@ -49,7 +49,7 @@ class TwitterService
             $data = $response->json();
             $data['tweets'] = array_slice($data['tweets'] ?? [], 0, 2);
 
-// (Opcional) ajustar paginación porque ya no seguimos
+            // (Opcional) ajustar paginación porque ya no seguimos
             $data['has_next_page'] = false;
             unset($data['next_cursor']);
 

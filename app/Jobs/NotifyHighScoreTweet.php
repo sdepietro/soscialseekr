@@ -78,11 +78,22 @@ class NotifyHighScoreTweet implements ShouldQueue
 
         // Verificar antigüedad del tweet (máximo 6 horas)
         if ($this->tweet->created_at_twitter) {
-            $hoursOld = now()->diffInHours($this->tweet->created_at_twitter);
+            $tweetAtUtc = $this->tweet->created_at_twitter->utc();
+            $nowUtc = now('UTC');
+
+            $hoursOld = intdiv($nowUtc->getTimestamp() - $tweetAtUtc->getTimestamp(), 3600);
+            // alternativa con decimales:
+            // $hoursOld = ($nowUtc->getTimestamp() - $tweetAtUtc->getTimestamp()) / 3600;
+
+            // Debug:
+            Log::warning('Tiempos (UTC):', [
+                'ahora_utc' => $nowUtc->toIso8601String(),
+                'tweet_utc' => $tweetAtUtc->toIso8601String(),
+                'diff_horas' => $hoursOld,
+            ]);
 
             if ($hoursOld > 6) {
-                // Descartar silenciosamente tweets antiguos (>6 horas)
-                return;
+                return; // descartar
             }
         }
 
