@@ -223,8 +223,8 @@
                                                 <!-- Antigüedad -->
                                                 <td>
                                                     <small class="text-muted">
-                                                        @if($tweet->created_at_twitter)
-                                                            {{ $tweet->created_at_twitter->diffForHumans(null, true, true) }}
+                                                        @if($tweet->created_at_local)
+                                                            {{ $tweet->created_at_local->diffForHumans(null, true, true) }}
                                                         @else
                                                             N/A
                                                         @endif

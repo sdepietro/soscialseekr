@@ -57,4 +57,13 @@ class Tweet extends Model
 
         return "https://x.com/{$this->account->username}/status/{$this->twitter_id}";
     }
+
+    /**
+     * Accessor para obtener created_at_twitter en timezone de Buenos Aires
+     * La fecha se guarda en UTC en la BD, pero se muestra en GMT-3
+     */
+    public function getCreatedAtLocalAttribute()
+    {
+        return $this->created_at_twitter?->timezone('America/Argentina/Buenos_Aires');
+    }
 }

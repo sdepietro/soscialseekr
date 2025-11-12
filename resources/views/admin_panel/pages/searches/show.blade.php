@@ -140,11 +140,11 @@
                                             <!-- Antigüedad -->
                                             <td>
                                                 <small class="text-muted">
-                                                    @if($tweet->created_at_twitter)
-                                                        {{ $tweet->created_at_twitter->diffForHumans() }}
+                                                    @if($tweet->created_at_local)
+                                                        {{ $tweet->created_at_local->diffForHumans() }}
                                                         <br>
                                                         <span class="text-muted" style="font-size: 0.75rem;">
-                                                            {{ $tweet->created_at_twitter->format('d/m/Y H:i') }}
+                                                            {{ $tweet->created_at_local->format('d/m/Y H:i') }}
                                                         </span>
                                                     @else
                                                         N/A
