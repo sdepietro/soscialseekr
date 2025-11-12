@@ -1,27 +1,45 @@
 <?php
 
-namespace App\Http\Controllers\Crons;
+namespace App\Console\Commands;
 
-use App\Http\Controllers\Controller;
 use App\Jobs\NotifyHighScoreTweet;
-use App\Models\Account;
 use App\Models\Search;
 use App\Models\Tweet;
-use App\Models\TweetHistory;
-use App\Services\TwitterService;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Services\ChatGptService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class CronIaAnalyzerController extends Controller
+class AnalyzeTweetsWithAI extends Command
 {
     /**
-     * Ejecuta el análisis IA de tweets pendientes.
-     * Agrupa tweets por búsqueda y usa el prompt personalizado de cada una.
-     * Este cron debe ejecutarse cada 1 minuto.
+     * The name and signature of the console command.
+     *
+     * @var string
      */
-    public function run(Request $request)
+    protected $signature = 'tweets:analyze-ai';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Analyze pending tweets with AI and dispatch notifications';
+
+    protected ChatGptService $chatGptService;
+
+    /**
+     * Create a new command instance.
+     */
+    public function __construct(ChatGptService $chatGptService)
+    {
+        parent::__construct();
+        $this->chatGptService = $chatGptService;
+    }
+
+    /**
+     * Execute the console command.
+     */
+    public function handle(): int
     {
         // Obtener tweets pendientes de análisis, agrupados por search_id
         $tweetsToAnalyze = Tweet::where('ia_analyzed', false)
@@ -29,22 +47,22 @@ class CronIaAnalyzerController extends Controller
             ->with('search')
             ->get();
 
+        $this->info('🤖 Iniciando análisis IA de tweets...');
+
         Log::info('CronIaAnalyzer: Iniciando análisis de tweets', [
             'tweets_pending' => $tweetsToAnalyze->count()
         ]);
 
         if ($tweetsToAnalyze->isEmpty()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'No hay tweets pendientes de analizar',
-                'tweets_analyzed' => 0
-            ]);
+            $this->info('✓ No hay tweets pendientes de analizar');
+            return self::SUCCESS;
         }
+
+        $this->info("📊 Tweets pendientes de análisis: {$tweetsToAnalyze->count()}");
 
         // Agrupar tweets por search_id
         $tweetsBySearch = $tweetsToAnalyze->groupBy('search_id');
 
-        $chatGptService = app()->make(\App\Services\ChatGptService::class);
         $totalUpdated = 0;
         $searchesProcessed = 0;
 
@@ -58,6 +76,7 @@ class CronIaAnalyzerController extends Controller
                     'search_id' => $searchId,
                     'tweets_count' => $tweets->count()
                 ]);
+                $this->warn("  ⚠️  Búsqueda ID {$searchId} no encontrada ({$tweets->count()} tweets)");
                 continue;
             }
 
@@ -67,11 +86,14 @@ class CronIaAnalyzerController extends Controller
                     'search_id' => $searchId,
                     'search_name' => $search->name
                 ]);
+                $this->warn("  ⚠️  Búsqueda '{$search->name}' sin prompt IA configurado");
                 continue;
             }
 
             // Limitar a 20 tweets por búsqueda por ejecución
             $tweetsToProcess = $tweets->take(20);
+
+            $this->line("  → Procesando '{$search->name}': {$tweetsToProcess->count()} tweets");
 
             Log::info('CronIaAnalyzer: Procesando tweets para búsqueda', [
                 'search_id' => $searchId,
@@ -80,7 +102,7 @@ class CronIaAnalyzerController extends Controller
             ]);
 
             // Evaluar tweets usando el prompt personalizado de la búsqueda
-            $results = $chatGptService->evaluateTweets($tweetsToProcess, $search->ia_prompt,$search->user->company);
+            $results = $this->chatGptService->evaluateTweets($tweetsToProcess, $search->ia_prompt, $search->user->company);
 
             Log::info('CronIaAnalyzer: Resultados recibidos de ChatGPT', [
                 'search_id' => $searchId,
@@ -88,6 +110,7 @@ class CronIaAnalyzerController extends Controller
             ]);
 
             // Actualizar tweets con los resultados
+            $tweetsUpdatedInSearch = 0;
             foreach ($results as $res) {
                 // Buscar el tweet correspondiente
                 $tweet = Tweet::where('id', $res['id'])->first();
@@ -98,25 +121,25 @@ class CronIaAnalyzerController extends Controller
                     $tweet->ia_reason = $res['reason'];
                     $tweet->save();
                     $totalUpdated++;
+                    $tweetsUpdatedInSearch++;
 
                     // Disparar job para notificación de WhatsApp si cumple criterios
                     NotifyHighScoreTweet::dispatch($tweet);
                 }
             }
 
+            $this->info("    ✓ Analizados: {$tweetsUpdatedInSearch} tweets");
             $searchesProcessed++;
         }
+
+        $this->newLine();
+        $this->info("✅ Análisis completado: {$searchesProcessed} búsquedas procesadas, {$totalUpdated} tweets analizados");
 
         Log::info('CronIaAnalyzer: Análisis completado', [
             'searches_processed' => $searchesProcessed,
             'tweets_updated' => $totalUpdated
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Análisis completado',
-            'searches_processed' => $searchesProcessed,
-            'tweets_analyzed' => $totalUpdated
-        ]);
+        return self::SUCCESS;
     }
 }

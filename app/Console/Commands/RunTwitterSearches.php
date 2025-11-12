@@ -1,39 +1,62 @@
 <?php
 
-namespace App\Http\Controllers\Crons;
+namespace App\Console\Commands;
 
-use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Search;
 use App\Models\Tweet;
 use App\Models\TweetHistory;
 use App\Services\TwitterService;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class CronSearchesController extends Controller
+class RunTwitterSearches extends Command
 {
     /**
-     * Ejecuta las búsquedas configuradas, persiste cuentas y tweets, genera historial y detecta spikes.
-     * Este cron debe ejecutarse cada 1 minuto.
+     * The name and signature of the console command.
+     *
+     * @var string
      */
-    public function run(Request $request)
+    protected $signature = 'twitter:search';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Execute scheduled Twitter searches and save results';
+
+    protected TwitterService $twitterService;
+
+    /**
+     * Create a new command instance.
+     */
+    public function __construct(TwitterService $twitterService)
+    {
+        parent::__construct();
+        $this->twitterService = $twitterService;
+    }
+
+    /**
+     * Execute the console command.
+     */
+    public function handle(): int
     {
         $now = Carbon::now();
-        $twitterService = new TwitterService();
+
+        $this->info('🔍 Iniciando búsquedas programadas de Twitter...');
 
         // Cargar búsquedas activas
         $searches = Search::active()->get();
 
         if ($searches->isEmpty()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'No hay búsquedas activas configuradas.',
-                'searches_processed' => 0,
-            ]);
+            $this->warn('⚠️  No hay búsquedas activas configuradas.');
+            return self::SUCCESS;
         }
+
+        $this->info("📊 Búsquedas activas encontradas: {$searches->count()}");
 
         $resultsPerSearch = [];
         $totalSearchesExecuted = 0;
@@ -45,9 +68,17 @@ class CronSearchesController extends Controller
             }
 
             try {
-                $result = $this->executeSearch($search, $twitterService, $now);
+                $this->line("  → Ejecutando búsqueda: {$search->query} (ID: {$search->id})");
+                $result = $this->executeSearch($search, $now);
                 $resultsPerSearch[] = $result;
                 $totalSearchesExecuted++;
+
+                if ($result['success']) {
+                    $stats = $result['stats'];
+                    $this->info("    ✓ Completada: {$stats['tweets_created']} nuevos, {$stats['tweets_updated']} actualizados, {$stats['notified_count']} notificados");
+                } else {
+                    $this->error("    ✗ Error: {$result['message']}");
+                }
             } catch (\Throwable $e) {
                 Log::error('Error ejecutando búsqueda', [
                     'search_id' => $search->id,
@@ -55,6 +86,8 @@ class CronSearchesController extends Controller
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
+
+                $this->error("    ✗ Excepción: {$e->getMessage()}");
 
                 $resultsPerSearch[] = [
                     'search_id' => $search->id,
@@ -64,13 +97,10 @@ class CronSearchesController extends Controller
             }
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Procesamiento de búsquedas completado',
-            'searches_executed' => $totalSearchesExecuted,
-            'total_active_searches' => $searches->count(),
-            'results' => $resultsPerSearch,
-        ]);
+        $this->newLine();
+        $this->info("✅ Procesamiento completado: {$totalSearchesExecuted}/{$searches->count()} búsquedas ejecutadas");
+
+        return self::SUCCESS;
     }
 
     /**
@@ -93,13 +123,13 @@ class CronSearchesController extends Controller
     /**
      * Ejecuta una búsqueda individual y procesa sus resultados
      */
-    protected function executeSearch(Search $search, TwitterService $twitterService, Carbon $now): array
+    protected function executeSearch(Search $search, Carbon $now): array
     {
         // Ejecutar la búsqueda con los parámetros configurados
         $query = $search->query;
         $queryType = $search->query_type ?? 'Latest';
 
-        $resp = $twitterService->search($query, $queryType);
+        $resp = $this->twitterService->search($query, $queryType);
 
         // Si la API respondió correctamente
         if ($resp && isset($resp['tweets']) && is_array($resp['tweets']) && count($resp['tweets']) > 0) {
@@ -293,10 +323,6 @@ class CronSearchesController extends Controller
 
                 DB::commit();
 
-
-                //Ahora analizamos los tweets procesados con IA
-
-
                 return [
                     'search_id' => $search->id,
                     'search_query' => $search->query,
@@ -319,7 +345,7 @@ class CronSearchesController extends Controller
                     'error' => $e->getMessage(),
                 ]);
 
-                throw $e; // Re-lanzar para que sea capturado por el catch del método run
+                throw $e; // Re-lanzar para que sea capturado por el catch del método handle
             }
         }
 

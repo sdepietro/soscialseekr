@@ -41,6 +41,34 @@ php artisan db:seed            # Ejecutar seeders
 # GET /clear-cache   - Limpiar cachés
 ```
 
+### Comandos de Cron (Tareas Programadas)
+
+```bash
+# Ejecutar búsquedas de Twitter y guardar resultados
+php artisan twitter:search
+
+# Analizar tweets pendientes con IA
+php artisan tweets:analyze-ai
+
+# Ver tareas programadas en el scheduler
+php artisan schedule:list
+
+# Ejecutar el scheduler manualmente (una sola vez)
+php artisan schedule:run
+
+# Ejecutar el scheduler continuamente (para desarrollo)
+php artisan schedule:work
+
+# Configuración en producción:
+# Agregar al crontab del servidor:
+# * * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
+
+# Ver documentación completa de configuración:
+# NO_SUBIR/docs/CRON_SETUP.md
+```
+
+**Nota**: Los comandos `twitter:search` y `tweets:analyze-ai` están programados para ejecutarse automáticamente cada minuto mediante el Laravel Task Scheduler. En desarrollo, puedes usar `php artisan schedule:work` para ejecutar el scheduler localmente, o ejecutar los comandos manualmente para testing.
+
 ### Pruebas
 
 por el momento no hay pruebas ni test funcionales/unitarios válidos.
@@ -81,8 +109,11 @@ php artisan l5-swagger:generate  # Regenerar documentación API
 **Controladores** (`app/Http/Controllers/`):
 - `Api/UserController`: Autenticación JWT (login/logout/reset)
 - `Api/PlacesController`, `Api/OrdersController`: Endpoints del dominio
-- `Crons/MedicosController`: Ejecución de búsquedas programadas (debería ser job)
 - `Test/TwitterController`: Endpoints de prueba
+
+**Comandos de Consola** (`app/Console/Commands/`):
+- `RunTwitterSearches`: Ejecuta búsquedas programadas de Twitter cada minuto
+- `AnalyzeTweetsWithAI`: Analiza tweets pendientes con IA cada minuto
 
 **Modelos** (`app/Models/`):
 - `User`: Autenticación JWT con roles
@@ -288,6 +319,10 @@ Tipos:
 
 **Probar búsqueda**:
 ```bash
+# Ejecutar comando de búsqueda manualmente
+php artisan twitter:search
+
+# O usar endpoint de testing
 POST /test/buscar_tweets
 {
   "query": "min_replies:1 medico",
@@ -297,6 +332,10 @@ POST /test/buscar_tweets
 
 **Evaluar IA**:
 ```bash
+# Ejecutar análisis IA manualmente
+php artisan tweets:analyze-ai
+
+# O usar endpoint de testing
 POST /test/evaluateTweets
 ```
 
@@ -325,11 +364,10 @@ Swagger UI: `/api/documentation`
 ## Problemas conocidos
 
 1. Límite de 2 tweets en `TwitterService`
-2. Cron usa rutas web
-3. `notificate()` vacío
-4. Transacciones comentadas
-5. Contenedores `ypf_bdots_*`
-6. Cobertura de tests mínima
+2. `notificate()` vacío en `RunTwitterSearches` (método para detectar spikes)
+3. Transacciones comentadas en algunos lugares
+4. Contenedores `ypf_bdots_*` (nombres legacy)
+5. Cobertura de tests mínima
 
 ## Convenciones
 

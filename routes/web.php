@@ -2,8 +2,6 @@
 
 
 use App\Http\Controllers\Admin\SearchesController;
-use App\Http\Controllers\Crons\CronIaAnalyzerController;
-use App\Http\Controllers\Crons\CronSearchesController;
 use App\Http\Controllers\Test\TwitterController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
@@ -98,10 +96,6 @@ Route::get('/clear-cache', function () {
 
 Route::get('/test/twitter_search', [TwitterController::class, 'index']);
 Route::get('/test/evaluate_tweet', [TwitterController::class, 'evaluateTweets']);
-
-//Una vez por minuto
-Route::get('/crons/run_searches', [CronSearchesController::class, 'run']);
-Route::get('/crons/analyze_ia', [CronIaAnalyzerController::class, 'run']);
 
 
 
