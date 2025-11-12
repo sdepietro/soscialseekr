@@ -96,6 +96,7 @@ Route::get('/clear-cache', function () {
 
 Route::get('/test/twitter_search', [TwitterController::class, 'index']);
 Route::get('/test/evaluate_tweet', [TwitterController::class, 'evaluateTweets']);
+Route::get('/test/create_notification_tweet', [TwitterController::class, 'createFakeTweetForNotification']);
 
 
 
