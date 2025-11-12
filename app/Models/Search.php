@@ -14,9 +14,9 @@ class Search extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'active'            => 'boolean',
-        'only_from_accounts'=> 'array',
-        'last_run_at'       => 'datetime',
+        'active' => 'boolean',
+        'only_from_accounts' => 'array',
+        'last_run_at' => 'datetime',
     ];
 
     // Scopes útiles

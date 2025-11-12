@@ -25,7 +25,6 @@ return new class extends Migration {
 //        });
 
 
-
         /**
          * Permisos (estructura existente)
          */
@@ -60,7 +59,7 @@ return new class extends Migration {
          */
         DB::table('permissions_father')->insert([
             ['id' => 1, 'name' => "Dashboard", 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 2, 'name' => "Usuarios",  'created_at' => now(), 'updated_at' => now()],
+            ['id' => 2, 'name' => "Usuarios", 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // Usuario admin
@@ -216,6 +215,7 @@ return new class extends Migration {
             $table->integer('user_id');          // Id del usuario que creó la búsqueda
             $table->string('name', 191)->nullable();          // etiqueta interna
             $table->text('query');                            // la query a enviar a la API
+            $table->text('ia_prompt');                        // prompt personalizado para análisis IA de tweets
             $table->string('lang', 10)->nullable();           // ej: "es"
             $table->string('country', 5)->default('AR');      // acotamos por Argentina si aplica
             $table->boolean('active')->default(true);
@@ -295,7 +295,6 @@ return new class extends Migration {
             $table->json('raw_payload')->nullable();        // snapshot crudo del tweet
 
 
-
             $table->timestamps();
             $table->softDeletes();
 
@@ -339,6 +338,28 @@ return new class extends Migration {
             $table->index(['tweet_id', 'reason']);
             $table->index(['changed_at']);
         });
+
+
+        Schema::create('whatsapp_notification_logs', function (Blueprint $table) {
+            $table->id();
+            $table->string('phone', 20)->index();
+            $table->unsignedBigInteger('tweet_id')->nullable();
+            $table->string('status', 20)->default('pending'); // pending, success, error
+            $table->text('message_snippet')->nullable();
+            $table->text('error_message')->nullable();
+            $table->timestamp('sent_at')->nullable()->index();
+            $table->timestamps();
+
+            // Índice compuesto para consultas de rate limiting
+            $table->index(['phone', 'sent_at', 'status']);
+
+            // Foreign key opcional hacia tweets (con onDelete cascade)
+            $table->foreign('tweet_id')
+                ->references('id')
+                ->on('tweets')
+                ->onDelete('set null');
+        });
+
     }
 
     public function down(): void
@@ -356,6 +377,7 @@ return new class extends Migration {
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('users');
+        Schema::dropIfExists('whatsapp_notification_logs');
         Schema::enableForeignKeyConstraints();
     }
 };

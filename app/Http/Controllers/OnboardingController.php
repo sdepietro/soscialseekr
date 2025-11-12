@@ -160,6 +160,7 @@ class OnboardingController extends Controller
                 'query' => $template['query'],
                 'country' => $template['country'],
                 'lang' => $template['lang'],
+                'ia_prompt' => $template['ia_prompt'],
                 'active' => true,
                 'query_type' => 'Latest',
                 'run_every_minutes' => $company->max_frequency_minutes,

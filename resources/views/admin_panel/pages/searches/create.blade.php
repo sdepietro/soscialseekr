@@ -141,6 +141,35 @@
                     </div>
                 </div>
 
+                <!-- Configuración de Análisis IA -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fa-solid fa-robot text-primary"></i> Configuración de Análisis IA
+                        </h5>
+
+                        <div class="mb-3">
+                            <label for="ia_prompt" class="form-label">
+                                Prompt Personalizado para Análisis IA <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control @error('ia_prompt') is-invalid @enderror"
+                                      id="ia_prompt"
+                                      name="ia_prompt"
+                                      rows="10"
+                                      required
+                                      placeholder="Describe cómo debe analizar ChatGPT los tweets de esta búsqueda...&#10;&#10;Ejemplo:&#10;Eres un analista de redes sociales especializado en el sector tecnológico. Evalúa cada tweet según:&#10;1. Relevancia para startups (0-40 puntos)&#10;2. Potencial de conversión (0-30 puntos)&#10;3. Engagement esperado (0-20 puntos)&#10;4. Calidad del contenido (0-10 puntos)&#10;&#10;Devuelve un array JSON con: [{&quot;id&quot;:&quot;<tweet_id>&quot;,&quot;score&quot;:85,&quot;reason&quot;:&quot;...&quot;}]">{{ old('ia_prompt', $search->ia_prompt ?? '') }}</textarea>
+                            @error('ia_prompt')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">
+                                <i class="fa-solid fa-circle-info"></i>
+                                Define criterios específicos para que ChatGPT evalúe la relevancia de los tweets encontrados por esta búsqueda.
+                                El prompt debe indicar cómo puntuar de 0 a 100 cada tweet.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Constructor de Términos -->
                 <div class="card">
                     <div class="card-body">

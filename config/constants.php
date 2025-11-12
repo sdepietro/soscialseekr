@@ -45,6 +45,22 @@ return [
         'api_key' => env('OPENAI_API_KEY', ''),
         'max_tokens' => env('OPENAI_MAX_TOKENS', 2048),
         'version' => env('OPENAI_VERSION', 'gpt-3.5-turbo'),
+    ],
+    'waboty' => [
+        'client_id' => env('WABOTY_CLIENT_ID', ''),
+        'client_secret' => env('WABOTY_CLIENT_SECRET', ''),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Números de WhatsApp para notificaciones de tweets relevantes
+    | - Formato: código de país + código de área + número (sin espacios ni guiones)
+    | - Ejemplo Argentina: 5491112345678
+    |--------------------------------------------------------------------------
+    */
+    'whatsapp_notifications' => [
+        'phone_1' => env('WHATSAPP_NOTIFY_PHONE_1', '5491150052081'),
+        'phone_2' => env('WHATSAPP_NOTIFY_PHONE_2', '5491161657123'),
     ]
 
 

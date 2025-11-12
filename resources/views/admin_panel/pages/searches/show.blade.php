@@ -165,7 +165,7 @@
                                                         <div>
                                                             <strong>{{ $tweet->account->name }}</strong>
                                                             <br>
-                                                            <small class="text-muted">@{{ $tweet->account->username }}</small>
+                                                            <small class="text-muted">{{ '@'.$tweet->account->username }}</small>
                                                             <br>
                                                             <small class="text-muted">
                                                                 <i class="fa-solid fa-users"></i>

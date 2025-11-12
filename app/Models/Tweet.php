@@ -45,4 +45,16 @@ class Tweet extends Model
     {
         return $this->hasMany(TweetHistory::class, 'tweet_id');
     }
+
+    /**
+     * Accessor para obtener la URL del tweet en X/Twitter
+     */
+    public function getUrlAttribute(): string
+    {
+        if (!$this->account || !$this->twitter_id) {
+            return '';
+        }
+
+        return "https://x.com/{$this->account->username}/status/{$this->twitter_id}";
+    }
 }

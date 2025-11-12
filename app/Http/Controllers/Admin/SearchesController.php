@@ -87,6 +87,7 @@ class SearchesController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string|max:191',
             'query' => 'required|string',
+            'ia_prompt' => 'required|string|max:10000',
             'lang' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:5',
             'active' => 'boolean',
@@ -171,6 +172,7 @@ class SearchesController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'nullable|string|max:191',
             'query' => 'required|string',
+            'ia_prompt' => 'required|string|max:10000',
             'lang' => 'nullable|string|max:10',
             'country' => 'nullable|string|max:5',
             'active' => 'boolean',

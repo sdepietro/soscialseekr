@@ -179,6 +179,7 @@ return [
                 'country' => 'AR',
                 'lang' => 'es',
                 'description' => 'Detecta menciones sobre servicios médicos y salud',
+                'ia_prompt' => 'Analiza el tweet y determina si podría ser de interés para un médico o profesional de la salud. Busca menciones sobre turnos, atención médica, sistemas de gestión, historias clínicas, recetas, pacientes o experiencias en clínicas y hospitales.',
             ],
             [
                 'name' => 'Quejas de Pacientes',
@@ -186,6 +187,7 @@ return [
                 'country' => 'AR',
                 'lang' => 'es',
                 'description' => 'Identifica quejas y comentarios negativos',
+                'ia_prompt' => 'Evalúa si el tweet expresa una queja o experiencia negativa de un paciente respecto a la atención médica, clínicas, hospitales o médicos. Detecta emociones como enojo, frustración o decepción hacia el sistema de salud.',
             ],
         ],
 
@@ -196,6 +198,7 @@ return [
                 'country' => 'AR',
                 'lang' => 'es',
                 'description' => 'Detecta quejas y reclamos de clientes',
+                'ia_prompt' => 'Analiza si el tweet refleja una experiencia negativa con un producto, tienda o servicio. Identifica quejas, reclamos, problemas de atención o fallas en la entrega o calidad.',
             ],
             [
                 'name' => 'Menciones de Producto',
@@ -203,6 +206,7 @@ return [
                 'country' => 'AR',
                 'lang' => 'es',
                 'description' => 'Rastrea menciones de productos y compras',
+                'ia_prompt' => 'Determina si el tweet menciona una experiencia de compra o el uso de un producto o marca. Busca comentarios sobre satisfacción, calidad o intención de compra.',
             ],
         ],
 
@@ -213,6 +217,7 @@ return [
                 'country' => 'AR',
                 'lang' => 'es',
                 'description' => 'Detecta problemas con métodos de pago',
+                'ia_prompt' => 'Analiza si el tweet describe dificultades para realizar pagos o usar servicios financieros. Identifica menciones a tarjetas, transferencias, apps de pago o bancos que no funcionan correctamente.',
             ],
         ],
 
@@ -223,7 +228,10 @@ return [
                 'country' => 'AR',
                 'lang' => 'es',
                 'description' => 'Define tus propios términos de búsqueda',
+                'ia_prompt' => 'Analiza el tweet según los términos personalizados definidos por el usuario. Evalúa su relevancia con respecto al contexto o industria que el usuario haya configurado.',
             ],
         ],
+
+
     ],
 ];

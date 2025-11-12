@@ -243,7 +243,7 @@
                                                             @endif
                                                             <div>
                                                                 <div><strong>{{ \Illuminate\Support\Str::limit($tweet->account->name, 20) }}</strong></div>
-                                                                <small class="text-muted">@{{ $tweet->account->username }}</small>
+                                                                <small class="text-muted">{{ '@'.$tweet->account->username }}</small>
                                                             </div>
                                                         </div>
                                                     @else

@@ -21,23 +21,15 @@ class ChatGptService
     }
 
 
-    public function evaluateTweets($tweets): array
+    public function evaluateTweets($tweets, $customPrompt, $company): array
     {
         // 1) System prompt (criterios de evaluación)
-        $system_prompt = "Eres un analista de redes sociales para una empresa SaaS médica en Argentina (MediCloud).
-Debes puntuar cada tweet de 0 a 100 según su relevancia para el negocio, utilizando los siguientes criterios:
-
-1. Intención médica (0–40): menciona turnos o citas médicas, recetas, coberturas u obras sociales, experiencias en clínicas, o comunicación con médicos.
-2. Accionabilidad (0–25): plantea una pregunta explícita, una queja, o una solicitud de recomendación.
-3. Contexto argentino (0–15): menciona ciudades argentinas, obras sociales (OSDE, Swiss, Galeno, PAMI, IOMA), pesos argentinos o instituciones locales.
-4. Seguridad y adecuación (0–10): evita contenido con datos personales de salud o información sensible.
-5. Recencia e interacción (0–10): da prioridad a los tweets recientes y con más likes o respuestas.
-
+        // Si se proporciona un prompt personalizado, usarlo; sino usar el predeterminado
+        $system_prompt = "Eres un analista de redes sociales para una empresa del area de ".$company->industry.". El country code de la empresa es: ".$company->country.".
+Debes puntuar cada tweet de 0 a 100 según su relevancia para el negocio, Usando la siguiente consigna:".$customPrompt."
 Devuelve un array JSON estricto con el siguiente formato:
 [{\"id\":\"<tweet_id>\",\"score\":87,\"reason\":\"...\"}]
-
 Tweets a evaluar (máximo 20):";
-
         // 2) Normalizamos y limitamos a 20 tweets
         $rows = [];
         $counter = 0;
@@ -81,7 +73,8 @@ Tweets a evaluar (máximo 20):";
 
         \Log::info('ChatGptService: Evaluando tweets', [
             'count' => count($rows),
-            'sample' => $rows[0] ?? null
+            'sample' => $rows[0] ?? null,
+            'custom_prompt' => $customPrompt !== null
         ]);
 
         // 3) Mensaje de usuario con el bloque de tweets
