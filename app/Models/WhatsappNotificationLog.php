@@ -91,8 +91,30 @@ class WhatsappNotificationLog extends Model
             return ['can_send' => true, 'wait_seconds' => null];
         }
 
-        $secondsSinceLastSent = now()->diffInSeconds($lastSent->sent_at);
+        // Usar false como segundo parámetro para obtener valores con signo
+        // (negativos si sent_at está en el futuro)
+        $secondsSinceLastSent = now()->diffInSeconds($lastSent->sent_at, false);
         $minWaitSeconds = 120; // 2 minutos
+
+        // Debug logging para diagnosticar problemas
+        \Log::debug('Rate limit check', [
+            'phone' => $phone,
+            'last_sent_at' => $lastSent->sent_at->toIso8601String(),
+            'now' => now()->toIso8601String(),
+            'seconds_since_last_sent' => $secondsSinceLastSent,
+        ]);
+
+        // Si sent_at está en el futuro (segundos negativos), permitir envío inmediato
+        if ($secondsSinceLastSent < 0) {
+            \Log::warning('sent_at en el futuro detectado - permitiendo envío inmediato', [
+                'phone' => $phone,
+                'sent_at' => $lastSent->sent_at->toIso8601String(),
+                'now' => now()->toIso8601String(),
+                'seconds_in_future' => abs($secondsSinceLastSent),
+                'last_log_id' => $lastSent->id,
+            ]);
+            return ['can_send' => true, 'wait_seconds' => null];
+        }
 
         if ($secondsSinceLastSent >= $minWaitSeconds) {
             return ['can_send' => true, 'wait_seconds' => null];

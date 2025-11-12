@@ -7,6 +7,7 @@ use App\Models\BlackSpotType;
 use App\Models\Tweet;
 use App\Models\Account;
 use App\Models\Search;
+use App\Models\WhatsappNotificationLog;
 use App\Services\TwitterService;
 use App\Jobs\NotifyHighScoreTweet;
 use Illuminate\Http\Request;
@@ -205,6 +206,72 @@ class TwitterController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al crear el tweet fake: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Limpia registros de WhatsApp con sent_at en el futuro
+     * Endpoint de testing para corregir datos corruptos que causan problemas de rate limiting
+     */
+    public function cleanFutureWhatsappLogs(Request $request)
+    {
+        try {
+            // Buscar todos los registros con sent_at en el futuro
+            $futureLogsQuery = WhatsappNotificationLog::whereNotNull('sent_at')
+                ->whereRaw('sent_at > NOW()');
+
+            // Obtener información antes de eliminar
+            $futureLogsCount = $futureLogsQuery->count();
+
+            if ($futureLogsCount === 0) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No se encontraron registros con sent_at en el futuro.',
+                    'deleted_count' => 0,
+                ]);
+            }
+
+            // Obtener detalles de los registros antes de eliminar
+            $futureLogsDetails = $futureLogsQuery->get()->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'phone' => $log->phone,
+                    'tweet_id' => $log->tweet_id,
+                    'status' => $log->status,
+                    'sent_at' => $log->sent_at->toIso8601String(),
+                    'seconds_in_future' => now()->diffInSeconds($log->sent_at, false) * -1,
+                ];
+            });
+
+            // Eliminar los registros
+            $deletedCount = WhatsappNotificationLog::whereNotNull('sent_at')
+                ->whereRaw('sent_at > NOW()')
+                ->delete();
+
+            \Log::info('Registros de WhatsApp con sent_at futuro eliminados', [
+                'deleted_count' => $deletedCount,
+                'details' => $futureLogsDetails,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Se eliminaron {$deletedCount} registros con sent_at en el futuro.",
+                'deleted_count' => $deletedCount,
+                'deleted_records' => $futureLogsDetails,
+                'explanation' => 'Estos registros causaban que el rate limit calculara tiempos de espera incorrectos (miles de segundos en lugar de 120 segundos).',
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error al limpiar registros de WhatsApp futuros', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al limpiar registros: ' . $e->getMessage(),
             ], 500);
         }
     }
