@@ -161,7 +161,7 @@ class OnboardingController extends Controller
                 'country' => $template['country'],
                 'lang' => $template['lang'],
                 'ia_prompt' => $template['ia_prompt'],
-                'active' => true,
+                'active' => false,
                 'query_type' => 'Latest',
                 'run_every_minutes' => $company->max_frequency_minutes,
             ];
@@ -192,12 +192,13 @@ class OnboardingController extends Controller
             $query = "min_replies:1 ({$keywords}) -filter:replies";
 
             $searchData = [
+
                 'user_id' => $user->id,
                 'name' => $request->search_name,
                 'query' => $query,
                 'country' => $request->country,
                 'lang' => $request->lang ?? 'es',
-                'active' => true,
+                'active' => false,
                 'query_type' => 'Latest',
                 'run_every_minutes' => $company->max_frequency_minutes,
             ];
